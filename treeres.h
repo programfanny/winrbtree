@@ -1,0 +1,35 @@
+// TIMER
+#define ID_TIMER 1
+
+// 资源文件中的菜单定义
+#define IDC_MYMENU 101
+#define IDD_INPUT_DIALOG 102
+#define IDC_INPUT_EDIT 103
+#define WM_USER_INPUT (WM_USER+1)
+#define IDEDIT 105
+#define IDLABEL 106
+
+#define IDM_ABOUT 110
+#define IDM_EXIT 111
+#define IDS_APP_TITLE 112
+#define IDM_OPEN_INPUT 1001
+
+//#define CHESS 40000
+#define IDM_TREE_NEW 		40001
+#define IDM_TREE_OPEN 		40002
+#define IDM_TREE_SAVE 		40003
+#define IDM_APP_EXIT 		40005
+#define IDM_EDIT_UNDO 		40006
+#define IDM_EDIT_ADD 		40007
+#define IDM_EDIT_DEL 		40008
+#define IDM_EDIT_MODIFY 	40009
+#define IDM_EDIT_SEARCH 	40010
+#define IDM_TREE_DFS 		40011
+#define IDM_TREE_BFS 		40012
+#define IDM_TREE_DIJKSTRA 	40013
+#define IDM_TREE_FLOYD 		40014
+#define IDM_TREE_PRIM 		40015
+#define IDM_TIMER_ON 		40016
+#define IDM_TIMER_OFF 		40017
+#define IDM_APP_HELP 		40018
+#define IDM_APP_ABOUT 		40019

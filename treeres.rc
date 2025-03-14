@@ -1,0 +1,73 @@
+#include <windows.h>
+#include "treeres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+// Menu
+TREEMENU MENU DISCARDABLE 
+BEGIN
+	POPUP "&File"
+	BEGIN
+		MENUITEM "&New\tEnter", IDM_TREE_NEW
+		MENUITEM "&Open\tF2", IDM_TREE_OPEN
+		MENUITEM "&Save\tF3", IDM_TREE_SAVE
+		MENUITEM SEPARATOR
+		MENUITEM "E&xit\tESC", IDM_APP_EXIT
+	END
+	POPUP "&Edit"
+	BEGIN
+		MENUITEM "&Add a node\tIns", IDM_EDIT_ADD
+		MENUITEM "&Delete a node\tDel", IDM_EDIT_DEL
+		MENUITEM "&Modify a node\tF4", IDM_EDIT_MODIFY
+		MENUITEM "&Search a node\tF5", IDM_EDIT_SEARCH
+	END
+	POPUP "&Timer"
+	BEGIN
+		MENUITEM "&Start", IDM_TIMER_ON
+		MENUITEM "S&top", IDM_TIMER_OFF
+	END
+	POPUP "&Help"
+	BEGIN
+		MENUITEM "&Help...\tF1", IDM_APP_HELP
+		MENUITEM "&About MenuDemo...", IDM_APP_ABOUT
+	END
+END
+////////////////////////////////////////////////////////////////
+//menu
+/*
+IDC_MYMENU MENU DISCARDABLE 
+POPUP "MyMenu"
+BEGIN
+	MENUITEM "&About...", IDM_ABOUT 
+	MENUITEM "E&xit"，IDM_EXIT
+END
+*/
+//////////////////////////////////////////////////////////////////////
+//Dialog
+IDD_DIALOG_ABOUT DIALOGEX 0,0,290,59
+STYLE DS_SETFONT|DS_MODALFRAME|DS_FIXEDSYS|WS_POPUP|WS_CAPTION|WS_SYSMENU
+CAPTION "Dialog"
+FONT 8,"MS Shell Dlg", 400,0,0x1
+BEGIN
+	LTEXT "Windows Resource Demo",3001,26,14,119,8,SS_NOPREFIX
+	LTEXT "Copyright (C) 2024 By Programfanny",3002,26,30,119,8
+	DEFPUSHBUTTON "OK",IDOK,234,14,32,14,WS_GROUP
+	DEFPUSHBUTTON "Quit",IDCANCEL,234,31,32,14,WS_GROUP
+END
+///////////////////////////////////////////////////////////////////////
+// INPUT_DIALOG
+IDD_INPUT_DIALOG DIALOGEX 0, 0, 200, 100
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Enter a String"
+BEGIN
+    EDITTEXT        IDC_INPUT_EDIT, 10, 10, 180, 16, ES_AUTOHSCROLL|WS_TABSTOP|WS_GROUP
+    DEFPUSHBUTTON   "Comfirm", IDOK, 70, 60, 60, 18
+    PUSHBUTTON      "Cancel", IDCANCEL, 140, 60, 50, 18
+END
+
+///////////////////////////////////////////////////////////////////////
+//
+STRINGTABLE DISCARDABLE
+BEGIN
+	IDS_APP_TITLE, "Graph Demo"
+
+END
