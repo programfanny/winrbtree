@@ -4,8 +4,8 @@
 
 typedef enum { RED, BLACK } Color;
 typedef enum { SEARCH, ADDNODE, MODIFY } op;
-typedef struct RBTREE RBTREE;
-struct RBTREE {
+typedef struct RBTreeNode RBTREE;
+struct RBTreeNode {
     int data;
     Color color;
     RBTREE *left, *right, *parent;
@@ -20,10 +20,8 @@ void InsertTreeNode(RBTREE **T, int data);
 void DeleteTreeNode(RBTREE** T, RBTREE* tNode); 
 void ModifyTreeNode(RBTREE** T, RBTREE* tNode, int newValue);
 
-void SaveRBTreeToFile(RBTREE *root, const char *filename); 
-void LoadRBTreeFromFile(RBTREE **root, const char *filename);
-void SaveRBTree(RBTREE *root, const char *filename);
-void LoadRBTree(RBTREE **root, const char *filename); 
+void SaveRBTree(RBTREE *root, char *filename);
+void ReadRBTree(RBTREE **root, char *filename); 
 void BuildRBTree(RBTREE **T, int *nums, int numsSize);
 void DestroyTree(RBTREE **T);
 

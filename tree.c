@@ -659,7 +659,7 @@ RBTREE *ReadNode(FILE *file) {
     newNode->right = ReadNode(file);
     return newNode;
 }
-void LoadRBTree(RBTREE **root, const char *filename) {
+void ReadRBTree(RBTREE **root, char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         perror("Failed to open file");
@@ -679,7 +679,7 @@ void SaveNode(RBTREE *node, FILE *file) {
     SaveNode(node->left, file);
     SaveNode(node->right, file);
 }
-void SaveRBTree(RBTREE *root, const char *filename) {
+void SaveRBTree(RBTREE *root, char *filename) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         perror("Failed to open file");
@@ -687,54 +687,4 @@ void SaveRBTree(RBTREE *root, const char *filename) {
     }
     SaveNode(root, file);
     fclose(file);
-}
-void serializeRBTree(RBTREE *root, FILE *fp) {
-    if (root == NULL) {
-        int marker = -1; // 使用-1表示空节点
-        fwrite(&marker, sizeof(int), 1, fp);
-        return;
-    }
-
-    // 写入节点数据（数据和颜色）
-    fwrite(&root->data, sizeof(int), 1, fp);
-    fwrite(&root->color, sizeof(Color), 1, fp);
-
-    // 递归序列化左右子树
-    serializeRBTree(root->left, fp);
-    serializeRBTree(root->right, fp);
-}
-
-void SaveRBTreeToFile(RBTREE *root, const char *filename) {
-    FILE *fp = fopen(filename, "wb");
-    if (fp == NULL) {
-        perror("Failed to open file");
-        return;
-    }
-    serializeRBTree(root, fp);
-    fclose(fp);
-}
-RBTREE* deserializeRBTree(FILE *fp) {
-    int data;
-    Color color;
-    fread(&data, sizeof(int), 1, fp);
-    if (data == -1) { 
-        return NULL;
-    }
-    fread(&color, sizeof(Color), 1, fp);
-    RBTREE *node = (RBTREE*)malloc(sizeof(RBTREE));
-    node->data = data;
-    node->color = color;
-    node->left = deserializeRBTree(fp);
-    node->right = deserializeRBTree(fp);
-    return node;
-}
-
-void LoadRBTreeFromFile(RBTREE **root, const char *filename) {
-    FILE *fp = fopen(filename, "rb"); 
-    if (fp == NULL) {
-        perror("Failed to open file");
-        *root = NULL;
-    }
-    *root = deserializeRBTree(fp);
-    fclose(fp);
 }

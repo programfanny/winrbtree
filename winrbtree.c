@@ -8,7 +8,9 @@
 #include "treeres.h"
 
 WNDPROC OldProc;
-// LRESULT CALLBACK EditSubClassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
+
+BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK HelpDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK EditSubClassProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK InputDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
@@ -75,8 +77,9 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 			nums = CreateArray(capacity, 0, 100);
 			arr=(int*)malloc(numsSize*sizeof(int));
 			BuildRBTree(&tree,nums,numsSize);
-			arrSize=0;
-			InorderTraversalMem(tree, &arr, &arrSize);			
+
+			PostMessage(hwnd, WM_KEYDOWN,VK_RETURN,0);
+			
 			hPen=malloc(32*sizeof(HPEN));
 			for(int i=0;i<32;i++){
 				hPen[i]=CreatePen(PS_SOLID,1,RGB(8*i,0,0));
@@ -124,7 +127,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 					InorderTraversalMem(tree, &arr, &arrSize);
 					FlushPage(hwnd, hMemDC, tree, nums, numsSize, arr, arrSize);
 					break;
-				case VK_F5:
+				case VK_F3:
 					PostMessage(hwnd, WM_COMMAND,IDM_EDIT_SEARCH,0);
 					break;	
 				case VK_INSERT:
@@ -135,20 +138,6 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 					break;	
 				case VK_F4:
 					PostMessage(hwnd, WM_COMMAND,IDM_EDIT_MODIFY,0);
-					break;
-				case VK_F2:
-					LoadRBTreeFromFile(&tree, "tree2.dat");
-					if(nums)free(nums);
-					nums=(int*)malloc(capacity*sizeof(int));
-					numsSize=0;
-					PreorderTraversalMem(tree, &nums, &numsSize) ;
-					arrSize=0;
-					InorderTraversalMem(tree, &arr, &arrSize);
-					FlushPage(hwnd, hMemDC, tree, nums, numsSize, arr, arrSize);
-					break;
-				case VK_F3:
-					SaveRBTreeToFile(tree, "tree2.dat");
-					PostMessage(hwnd, WM_COMMAND,IDM_TREE_SAVE,0);
 					break;	
 			}
 			return 0;	
@@ -171,14 +160,10 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 		case WM_COMMAND:
 			switch(wParam){
 				case IDM_TREE_NEW:
-					PostMessage(hwnd, WM_KEYDOWN,VK_RETURN,0);
+					PostMessage( hwnd, WM_KEYDOWN, VK_RETURN, 0 );
 					break;
 				case IDM_TREE_OPEN:
-					LoadRBTree(&tree, "tree.dat");
-					if(nums)free(nums);
-					nums=(int*)malloc(capacity*sizeof(int));
-					numsSize=0;
-					PreorderTraversalMem(tree, &nums, &numsSize) ;
+					ReadRBTree(&tree, "tree.dat");
 					arrSize=0;
 					InorderTraversalMem(tree, &arr, &arrSize);
 					FlushPage(hwnd, hMemDC, tree, nums, numsSize, arr, arrSize);					
@@ -190,6 +175,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 					PostMessage( hwnd, WM_DESTROY, 0, 0 );
 					break;
 				case IDM_EDIT_UNDO:
+
 					break;
 				case IDM_EDIT_ADD:
 					state = GetMenuState(hMenu, IDM_TIMER_ON, MF_BYCOMMAND); 
@@ -251,6 +237,21 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 						}
 					}
 					break;
+				case IDM_TREE_DFS:
+
+					break;
+				case IDM_TREE_BFS:
+
+					break;
+				case IDM_TREE_DIJKSTRA:
+
+					break;
+				case IDM_TREE_FLOYD:
+
+					break;
+				case IDM_TREE_PRIM:
+
+					break;
 				case IDM_TIMER_ON:
 					CheckMenuItem(hMenu, IDM_TIMER_ON, MF_BYCOMMAND | MF_CHECKED);
 					CheckMenuItem(hMenu, IDM_TIMER_OFF, MF_BYCOMMAND | MF_UNCHECKED);
@@ -261,11 +262,11 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 					CheckMenuItem(hMenu, IDM_TIMER_OFF, MF_BYCOMMAND | MF_CHECKED);				
 					KillTimer(hwnd, ID_TIMER);
 					break;
-				case IDM_APP_HELP:
-					
+				case IDM_APP_HELP      :
+					 DialogBox (hInstance, TEXT ("IDD_DIALOG_HELP"), hwnd, HelpDialogProc) ;
 					break;
-				case IDM_APP_ABOUT:
-
+				case IDM_APP_ABOUT     :
+					DialogBox (hInstance, TEXT ("IDD_DIALOG_ABOUT"), hwnd, AboutDlgProc) ;
 					break;
 			}
 			return 0;    
@@ -325,9 +326,25 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 	}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
+// LRESULT CALLBACK EditSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+// 	if (uMsg == WM_KEYDOWN && wParam == VK_RETURN) {
+// 		SendMessage(GetParent(hWnd), WM_COMMAND, MAKEWPARAM(IDOK, BN_CLICKED), 0);
+// 		return 0;
+// 	}
+// 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+// }
+
 LRESULT CALLBACK EditSubClassProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     TCHAR szInput[256];
     switch (message) {
+        // case WM_KEYDOWN:
+        //     switch(wParam){
+        //     	case VK_RETURN:
+		// 			GetWindowText(hwnd, szInput, 256);
+		// 			// MessageBox(hwnd, szInput, "Info", MB_OK);
+		// 			SendMessage(GetParent(hwnd), WM_USER_INPUT, 0, (LPARAM)szInput); 
+        //         	return 0; 	
+    	// }
     	case WM_CHAR:
     		switch(wParam){
     			case VK_RETURN:
@@ -335,7 +352,99 @@ LRESULT CALLBACK EditSubClassProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM
     				SendMessage(GetParent(hwnd), WM_USER_INPUT, 0, (LPARAM)szInput); 
     				return 0;
     	}
+    	//编辑控件（EDIT）在处理WM_CHAR消息的回车键时发出声音，而处理WM_KEYDOWN消息时并不发出声音。
     }
     return CallWindowProc(OldProc, hwnd, message, wParam, lParam);
 }
+INT_PTR CALLBACK InputDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+	HWND hEdit;
+	TCHAR szInput[256];
+	switch (msg) {
+		case WM_INITDIALOG:
+			hEdit = GetDlgItem(hDlg,IDC_INPUT_EDIT);
+			// SetWindowSubclass(hEdit, EditSubclassProc, 0, 0);
+			// OldProc = (WNDPROC)SetWindowLong(hEdit, GWL_WNDPROC, (LONG)SubClassProc);
+			SetFocus(hEdit);
+			return TRUE;
+		case WM_COMMAND:
+			switch(wParam){
+				case IDOK:
+					GetDlgItemText(hDlg, IDC_INPUT_EDIT, szInput, 256);
+					SendMessage(GetParent(hDlg), WM_USER_INPUT, 0, (LPARAM)szInput);  
+					EndDialog(hDlg, IDOK);
+					return TRUE;
+				case IDCANCEL:
+					EndDialog(hDlg, IDCANCEL);
+					return TRUE;
+			}
+			break;
+	}
+	return FALSE;
+}
+BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+     switch (message)
+     {
+     case WM_INITDIALOG :
+          return TRUE ;
+     case WM_COMMAND :
+          switch (LOWORD (wParam))
+          {
+          case IDOK :
+          case IDCANCEL :
+               EndDialog (hDlg, 0) ;
+               return TRUE ;
+          }
+          break ;
+     }
+     return FALSE ;
+}
+BOOL CALLBACK HelpDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    static HBRUSH hDlgBrush;
+    COLORREF dialogBgColor;
+    switch (uMsg) {
+    case WM_INITDIALOG:
+        // 获取对话框的背景颜色
+        dialogBgColor = GetSysColor(COLOR_3DFACE);
+        // 创建与对话框背景颜色相同的画刷
+        hDlgBrush = CreateSolidBrush(dialogBgColor);
+        return TRUE;
+    case WM_COMMAND:
+        switch (LOWORD(wParam)) {
+        case IDOK:
+        case IDCANCEL:
+            // 销毁画刷
+            DeleteObject(hDlgBrush);
+            EndDialog(hwndDlg, LOWORD(wParam));
+            return TRUE;
+        }
+        break;
+    case WM_CTLCOLORSTATIC: {
+        // 获取静态文本控件的句柄
+        HWND hCtrl = (HWND)lParam;
+        HDC hdcStatic = (HDC)wParam;
+        int controlId = GetDlgCtrlID(hCtrl);
 
+        switch (controlId) {
+        case 3001:
+            // 设置控件 ID 为 3001 的文本颜色为蓝色
+            SetTextColor(hdcStatic, RGB(0, 0, 255));
+            break;
+        case 3002:
+            // 设置控件 ID 为 3002 的文本颜色为红色
+            SetTextColor(hdcStatic, RGB(128, 0, 255));
+            break;
+        default:
+            // 其他控件设置为默认颜色（这里设置为黑色）
+            SetTextColor(hdcStatic, RGB(0, 0, 0));
+            break;
+        }
+
+        // 设置背景模式为透明
+        SetBkMode(hdcStatic, TRANSPARENT);
+        // 返回与对话框背景颜色相同的画刷
+        return (INT_PTR)hDlgBrush;
+    }
+    }
+    return FALSE;
+}
